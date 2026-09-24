@@ -1,0 +1,7 @@
+numpy>=1.26.0,<3.0.0
+scipy>=1.12.0,<2.0.0
+opencv-python>=4.9.0
+matplotlib>=3.8.0,<4.0.0
+ikpy>=3.3.0,<5.0.0
+pytest>=8.0.0
+Pillow>=10.0.0
