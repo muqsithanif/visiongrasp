@@ -25,9 +25,7 @@ from core.visualizer import SimulationVisualizer
 
 
 def main():
-    print("==================================================================")
-    print("    Vision-Guided Robotic Pick-and-Place Demonstration")
-    print("==================================================================")
+    print("visiongrasp: running the pick-and-place pipeline...")
 
     # 1. Initialize System Components
     print("\n[1/5] Initializing Camera Model & Kinematics Engine...")
@@ -178,10 +176,7 @@ def main():
     results_dir.mkdir(exist_ok=True)
     (results_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
 
-    print("\n==================================================================")
-    print("Demo Execution Completed Successfully!")
-    print(f"Artifacts ready in: {samples_dir}")
-    print("==================================================================")
+    print(f"Done. Artifacts saved to: {samples_dir}")
 
 
 if __name__ == "__main__":
