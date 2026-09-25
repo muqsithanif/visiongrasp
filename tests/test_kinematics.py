@@ -37,3 +37,14 @@ def test_inverse_kinematics_accuracy(kinematics):
         assert err < 0.015, f"IK error too large ({err*1000:.1f} mm) for target {target}"
         fk_pos, _ = kinematics.forward_kinematics(joint_sol)
         np.testing.assert_allclose(fk_pos, target, atol=0.015)
+
+
+def test_ik_keeps_the_gripper_pointing_down(kinematics):
+    # ikpy's inverse_kinematics_frame ignores orientation unless asked, which
+    # left the gripper tilted by up to 167 degrees at the pick pose.
+    for target in [np.array([0.42, -0.15, 0.02]), np.array([0.25, 0.32, 0.14])]:
+        q, err = kinematics.solve_ik(target)
+        _, rot = kinematics.forward_kinematics(q)
+        tilt_deg = np.degrees(np.arccos(np.clip(-rot[2, 2], -1.0, 1.0)))
+        assert err < 1e-3
+        assert tilt_deg < 1.0

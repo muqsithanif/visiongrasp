@@ -81,20 +81,18 @@ class ManipulatorKinematics:
         else:
             target_rot = target_orientation
 
-        # Construct 4x4 target transformation matrix
-        target_frame = np.eye(4, dtype=np.float64)
-        target_frame[:3, :3] = target_rot
-        target_frame[:3, 3] = target_pos
-
         initial_full = np.zeros(len(self.chain.links))
         if initial_guess is not None:
             initial_full[1:7] = initial_guess[:6]
         else:
             initial_full[1:7] = self.HOME_JOINTS
 
-        # Solve via ikpy numerical solver
-        solution_full = self.chain.inverse_kinematics_frame(
-            target_frame,
+        # inverse_kinematics_frame ignores the orientation unless told otherwise,
+        # which left the gripper at whatever tilt reached the position.
+        solution_full = self.chain.inverse_kinematics(
+            target_position=target_pos,
+            target_orientation=target_rot,
+            orientation_mode="all",
             initial_position=initial_full,
         )
 
