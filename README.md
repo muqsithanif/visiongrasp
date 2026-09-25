@@ -10,6 +10,15 @@ Vision-guided pick-and-place for a UR5 arm, run in a simulated workspace. An ove
 
 ## From pixel to robot coordinates
 
+```mermaid
+flowchart LR
+    RGBD["RGB-D frame"] --> Seg["HSV segmentation"]
+    Seg --> Part["Centroid, median depth, min-area rectangle"]
+    Part --> Base["Deproject to the base frame: position and yaw"]
+    Base --> IK["IK: gripper down, turned to the part's yaw"]
+    IK --> Traj["Quintic joint trajectories"]
+```
+
 The camera is fixed above the table, looking straight down. This is an eye-to-hand setup with a known camera pose, not a camera on the gripper. A detection at pixel (u, v) with depth Z becomes a point in the camera frame through the intrinsic matrix, and then a point in the robot's base frame through the camera's pose:
 
 ```
