@@ -1,0 +1,51 @@
+{
+  "scene": "simulated: rendered RGB-D frame, 640x480, two 4 cm blocks",
+  "detections": [
+    {
+      "part": "red_block",
+      "xy_mm": 0.73,
+      "z_mm": -0.0,
+      "yaw_deg": -1.8
+    },
+    {
+      "part": "blue_block",
+      "xy_mm": 0.74,
+      "z_mm": -0.0,
+      "yaw_deg": 0.96
+    }
+  ],
+  "ik_residual_at_key_poses": [
+    {
+      "pose": "pre-pick",
+      "position_mm": 0.0,
+      "tilt_deg": 0.0,
+      "yaw_error_deg": 0.0
+    },
+    {
+      "pose": "pick",
+      "position_mm": 0.0,
+      "tilt_deg": 0.0,
+      "yaw_error_deg": 0.0
+    },
+    {
+      "pose": "pre-place",
+      "position_mm": 0.0,
+      "tilt_deg": 0.0,
+      "yaw_error_deg": -0.0
+    },
+    {
+      "pose": "place",
+      "position_mm": 0.0,
+      "tilt_deg": 0.0,
+      "yaw_error_deg": -0.0
+    }
+  ],
+  "trajectory": {
+    "points": 158,
+    "duration_s": 7.85
+  },
+  "timing_ms_this_machine": {
+    "perception": 6.3,
+    "planning": 24.5
+  }
+}

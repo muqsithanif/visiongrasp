@@ -60,6 +60,7 @@ class PickAndPlaceStateMachine:
         pick_pos: np.ndarray,
         place_pos: np.ndarray,
         time_per_segment: float = 1.0,
+        pick_yaw_deg: float = 0.0,
     ) -> List[TrajectoryPoint]:
         """Generate smooth trajectory for a full pick-and-place cycle.
 
@@ -88,8 +89,13 @@ class PickAndPlaceStateMachine:
 
         # Solve IK for all critical waypoints
         q_home = self.kinematics.HOME_JOINTS.copy()
-        q_pre_pick, _ = self.kinematics.solve_ik(pre_pick_p, initial_guess=q_home)
-        q_pick, _ = self.kinematics.solve_ik(pick_p, initial_guess=q_pre_pick)
+        # Gripper pointing down, turned about the vertical to the part's yaw so
+        # the fingers close across its faces.
+        c, s_ = np.cos(np.deg2rad(pick_yaw_deg)), np.sin(np.deg2rad(pick_yaw_deg))
+        rot_z = np.array([[c, -s_, 0.0], [s_, c, 0.0], [0.0, 0.0, 1.0]])
+        pick_rot = rot_z @ np.array([[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0]])
+        q_pre_pick, _ = self.kinematics.solve_ik(pre_pick_p, target_orientation=pick_rot, initial_guess=q_home)
+        q_pick, _ = self.kinematics.solve_ik(pick_p, target_orientation=pick_rot, initial_guess=q_pre_pick)
         q_post_pick = q_pre_pick.copy()
 
         q_pre_place, _ = self.kinematics.solve_ik(pre_place_p, initial_guess=q_post_pick)
