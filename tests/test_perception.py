@@ -48,3 +48,21 @@ def test_3d_position_estimation_accuracy(setup_scene):
     assert np.isclose(estimated_pos[1], gt_pos[1], atol=0.005)
     # Check top surface height
     assert estimated_pos[2] > gt_pos[2]  # Top surface is higher than center
+
+
+@pytest.mark.parametrize("true_yaw", [-30.0, -15.0, 10.0, 25.0, 40.0])
+def test_yaw_is_reported_in_the_robot_base_frame(true_yaw):
+    # The image axes are swapped relative to the base axes, so reporting the
+    # image angle directly was off by tens of degrees. Square parts repeat
+    # every 90 degrees, so the comparison is taken modulo 90.
+    camera = CameraModel()
+    part = SyntheticObject(
+        name="part", color_name="red_block", bgr_color=(30, 30, 220),
+        hsv_lower=np.array([0, 100, 100]), hsv_upper=np.array([10, 255, 255]),
+        position_base=np.array([0.45, -0.05, 0.02]), dimensions=(0.04, 0.04, 0.04),
+        yaw_deg=true_yaw,
+    )
+    rgb, depth = SyntheticWorkspace(camera, table_z=0.0).generate_scene([part])
+    det = VisionPerception(camera).detect(rgb, depth)[0]
+    error = (det.yaw_deg - true_yaw + 45.0) % 90.0 - 45.0
+    assert abs(error) < 3.0

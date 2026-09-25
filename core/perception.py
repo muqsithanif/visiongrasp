@@ -102,12 +102,19 @@ class VisionPerception:
                 # De-project centroid to 3D base coordinates
                 pos_3d = self.camera.deproject_pixel_to_base(uc, vc, depth_val)
 
-                # Camera to base yaw alignment
-                # For our top-down camera with optical X -> +Y and optical Y -> +X,
-                # image plane rotation maps to base Z rotation:
-                yaw_base = float(angle) % 180.0
-                if yaw_base > 90.0:
-                    yaw_base -= 180.0
+                # Yaw in the robot base frame. The camera's image axes are swapped
+                # relative to the base axes (optical X -> base +Y, optical Y ->
+                # base +X), so an image angle is not a base angle. Deprojecting a
+                # second point along the rectangle's side gives the direction in
+                # base X-Y directly.
+                theta = np.deg2rad(angle)
+                p_axis = self.camera.deproject_pixel_to_base(
+                    uc + 20.0 * np.cos(theta), vc + 20.0 * np.sin(theta), depth_val
+                )
+                yaw_base = float(np.degrees(np.arctan2(p_axis[1] - pos_3d[1], p_axis[0] - pos_3d[0])))
+                # A square part looks the same every 90 degrees, a rectangle every 180.
+                period = 90.0 if abs(width - height) <= 0.1 * max(width, height) else 180.0
+                yaw_base = (yaw_base + period / 2.0) % period - period / 2.0
 
                 x, y, w, h = cv2.boundingRect(cnt)
 
