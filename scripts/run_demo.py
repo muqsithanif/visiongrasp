@@ -19,9 +19,7 @@ from core.visualizer import SimulationVisualizer
 
 
 def main():
-    print("==================================================================")
-    print("    Vision-Guided Robotic Pick-and-Place Demonstration")
-    print("==================================================================")
+    print("visiongrasp: Running autonomous pick-and-place pipeline...")
 
     # 1. Initialize System Components
     print("\n[1/5] Initializing Camera Model & Kinematics Engine...")
@@ -125,11 +123,7 @@ def main():
     )
     render_time = time.perf_counter() - t0_render
     print(f"      Animation rendered in {render_time:.2f} s")
-
-    print("\n==================================================================")
-    print("Demo Execution Completed Successfully!")
-    print(f"Artifacts ready in: {samples_dir}")
-    print("==================================================================")
+    print(f"Pipeline finished. Artifacts saved to: {samples_dir}")
 
 
 if __name__ == "__main__":

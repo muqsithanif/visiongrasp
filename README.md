@@ -8,20 +8,14 @@ Autonomous 6-DoF robotic manipulator pick-and-place pipeline with overhead RGB-D
 
 ---
 
-## The Spatial Perception Problem: 2D Pixels to 3D Robot Base
+## Coordinate Transformations: 2D Pixels to 3D Robot Base
 
-A 2D camera pixel cannot be fed directly to a robot arm. To bridge visual detection to physical manipulation, the system resolves two coordinate transformations:
+Converting raw image detections into physical manipulator target points requires resolving two coordinate transformations:
 
-```
-Pixel Frame (u, v) + Depth Z
-          │
-          │ Camera Intrinsics K⁻¹ (De-projection)
-          ▼
-Camera Optical Frame (X_cam, Y_cam, Z_cam)
-          │
-          │ Extrinsics Transform T_base_cam (Rotation & Translation)
-          ▼
-Robot Base Coordinate Frame (X_base, Y_base, Z_base)
+```mermaid
+flowchart TD
+    A["Pixel Coordinates (u, v) + Depth Z"] -->|Camera Intrinsics K⁻¹ (De-projection)| B["Camera Optical Frame (X_cam, Y_cam, Z_cam)"]
+    B -->|Extrinsic Transform T_base_cam| C["Robot Base Coordinate Frame (X_base, Y_base, Z_base)"]
 ```
 
 ### 1. Optical Ray De-projection
@@ -55,9 +49,7 @@ The vision pipeline extracts oriented grasping targets in three stages:
 
 ## Trajectory Planning & Jerk Suppression
 
-A common flaw in robotic pick-and-place demos is linear waypoint stepping. Discontinuous velocity transitions cause severe actuator jerk, structural vibration, and workpiece slippage.
-
-This pipeline interpolates all joint-space segments using **quintic (5th-order) polynomials**:
+Linear waypoint stepping introduces acceleration discontinuities and actuator jerk. To maintain smooth continuous motion, this pipeline interpolates all joint-space segments using **quintic (5th-order) polynomials**:
 
 $$s(\tau) = 10\tau^3 - 15\tau^4 + 6\tau^5, \quad \tau = \frac{t}{T} \in [0, 1]$$
 
@@ -66,14 +58,17 @@ This formulation guarantees boundary conditions:
 - $\ddot{s}(0) = \ddot{s}(1) = 0$ (Zero start and end acceleration)
 
 ### State Machine Lifecycle
-```
-[HOME] ──► [APPROACH PRE-GRASP] ──► [DESCEND CONTACT]
-                                             │
-                                             ▼
-[LIFT POST-GRASP] ◄── [ACTUATE GRIPPER CLOSE]
-       │
-       ▼
-[TRANSIT TO BIN] ──► [DESCEND PLACE] ──► [OPEN GRIPPER] ──► [ASCEND & RETURN HOME]
+
+```mermaid
+flowchart LR
+    Home["HOME"] --> PreGrasp["PRE-GRASP"]
+    PreGrasp --> Grasp["DESCEND & GRASP"]
+    Grasp --> Lift["LIFT"]
+    Lift --> Transit["TRANSIT TO BIN"]
+    Transit --> Place["DESCEND & PLACE"]
+    Place --> Release["OPEN GRIPPER"]
+    Release --> Return["RETURN HOME"]
+    Return --> Home
 ```
 
 ---
